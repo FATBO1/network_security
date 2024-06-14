@@ -2,9 +2,11 @@ from scapy.all import *
 
 #ICMP id 10 = 0xa
 def send_packet():
-    ip_packet = IP(dst="192.168.100.1")/ICMP(id=10)
+
+    ip_packet = IP(dst="127.0.0.1")/ICMP(id=10)/Raw('ifconfig')
     ip_packet.show()
-    respone = sr(ip_packet, verbose=1)
+    sr(ip_packet)
+
     
 
 def main():
