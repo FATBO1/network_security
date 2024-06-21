@@ -14,19 +14,21 @@ def check_duplicate(lst):
 
 def ids(packet):
     if packet.haslayer(ICMP):
-        icmp_type.append(packet[ICMP].type)
-        if check_duplicate(icmp_type) == True
-                print(f"Malicious ICMP Behaviour Detected!")
-                print(f"Source IP: {packet[IP].src}")
-                print(f"Destination IP: {packet[IP].dst}")
-                print(f"Signature Detected: There are duplicate replies/request for this ICMP connection.")
-                print(f"Data attribute containing command: {packet[Raw].load}")
-                icmp_type.clear()
+        if packet.haslayer(Raw):
+            icmp_type.append(packet[ICMP].type)
+            if check_duplicate(icmp_type) == True:
+                    print(f"Malicious ICMP Behaviour Detected!")
+                    print(f"ICMP Packet:")
+                    print(f"Source IP: {packet[IP].src}")
+                    print(f"Destination IP: {packet[IP].dst}")
+                    print(f"Signature Detected: There are duplicate replies/request for this ICMP connection.")
+                    print(f"Data attribute containing command: {packet[Raw].load}\n")
+                    icmp_type.clear()
        
 
 def main():
-    sniff(prn=ids, iface=incoming_interface, filter=inbound)
+    sniff(prn=ids, iface=incoming_interface, filter="inbound")
     
 
 if __name__ == "__main__":
-    shell()
+    main()
